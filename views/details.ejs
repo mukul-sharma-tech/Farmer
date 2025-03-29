@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Advisor | FarmerAssist</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="https://images.unsplash.com/photo-1511735643442-503bb3bd348a?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" type="image/icon type">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #28a745;
+            --secondary-color: #f8b400;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            padding-top: 70px;
+        }
+        
+        /* Navbar styling same as before */
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 0;
+            transition: all 0.3s;
+        }
+
+        .navbar.scrolled {
+            background: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white !important;
+        }
+
+        .navbar-brand span {
+            color: var(--secondary-color);
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--secondary-color);
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .nav-link:hover:before {
+            visibility: visible;
+            width: 100%;
+        }
+
+        .nav-link.active {
+            color: var(--secondary-color) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-outline-light:hover {
+            color: var(--dark-color);
+        }
+
+        
+        .dashboard-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            color: white;
+            padding: 80px 0;
+            margin-bottom: 40px;
+        }
+        
+        .input-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 30px;
+            height: 100%;
+            transition: all 0.3s;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .result-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .price-badge {
+            background-color: #e8f5e9;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .alert-card {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .weather-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            color: #2196F3;
+        }
+        
+        .crop-cycle {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .crop-cycle:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        .crop-cycle.active:before {
+            background-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(248, 180, 0, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 60px 0;
+            }
+        }
+
+
+                /* Footer */
+                footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        footer h5 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        footer h5:after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 2px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 0;
+        }
+
+        footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        footer ul li {
+            margin-bottom: 10px;
+        }
+
+        footer ul li a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        footer ul li a:hover {
+            color: var(--secondary-color);
+            padding-left: 5px;
+        }
+
+        .copyright {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .contact-info,
+            .contact-form {
+                margin-bottom: 30px;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><span>Farmer</span>Assist</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/weather">Live Weather</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/crop">FindCrop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mandi">Mandi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/AIFarm">AIFarm</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-outline-light ms-2" href="/login">Login</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary ms-2" href="/register">Register</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <div class="dashboard-header">
+        <div class="container text-center">
+            <h1><i class="fas fa-seedling"></i> Crop Advisor</h1>
+            <p class="lead">Get personalized farming recommendations based on your crop, location, and season</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="input-card">
+            <h3 class="mb-4"><i class="fas fa-edit"></i> Enter Your Farming Details</h3>
+            <form id="cropForm">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Select Crop</label>
+                        <select class="form-select" id="cropSelect" required>
+                            <option value="" selected disabled>Choose your crop</option>
+                            <option value="wheat">Wheat</option>
+                            <option value="rice">Rice</option>
+                            <option value="corn">Corn/Maize</option>
+                            <option value="sugarcane">Sugarcane</option>
+                            <option value="cotton">Cotton</option>
+                            <option value="soybean">Soybean</option>
+                            <option value="potato">Potato</option>
+                            <option value="tomato">Tomato</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Select State/District</label>
+                        <select class="form-select" id="regionSelect" required>
+                            <option value="" selected disabled>Choose your region</option>
+                            <option value="punjab">Punjab</option>
+                            <option value="haryana">Haryana</option>
+                            <option value="up">Uttar Pradesh</option>
+                            <option value="mp">Madhya Pradesh</option>
+                            <option value="maharastra">Maharashtra</option>
+                            <option value="karnataka">Karnataka</option>
+                            <option value="ap">Andhra Pradesh</option>
+                            <option value="tamilnadu">Tamil Nadu</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Current Season</label>
+                        <select class="form-select" id="seasonSelect" required>
+                            <option value="" selected disabled>Select season</option>
+                            <option value="kharif">Kharif (June-October)</option>
+                            <option value="rabi">Rabi (November-April)</option>
+                            <option value="zaid">Zaid (March-June)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-chart-line"></i> Get Recommendations
+                </button>
+            </form>
+        </div>
+
+        <div id="resultsSection" style="display: none;">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="result-card">
+                        <h4><i class="fas fa-rupee-sign"></i> Mandi Prices</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Mandi</th>
+                                        <th>Price (₹/quintal)</th>
+                                        <th>Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="priceTable">
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted small mt-2">Prices updated: <span id="priceUpdateTime"></span></p>
+                        <button class="btn btn-sm btn-outline-primary">View More Mandis</button>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="result-card">
+                        <h4><i class="fas fa-cloud-sun"></i> Weather Forecast</h4>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="weather-icon">
+                                <i class="fas fa-sun" id="weatherMainIcon"></i>
+                            </div>
+                            <div>
+                                <h5 id="weatherTemp">--°C</h5>
+                                <p id="weatherDesc">--</p>
+                            </div>
+                        </div>
+                        <div class="row text-center" id="weatherForecast">
+                        </div>
+                        <div class="alert alert-warning mt-3 alert-card" id="weatherAlert" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Weather Alert: </strong><span id="alertText"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="result-card">
+                        <h4><i class="fas fa-lightbulb"></i> Crop Care Suggestions</h4>
+                        <div id="cropSuggestions">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                        <button class="btn btn-sm btn-outline-success mt-2">View Detailed Guide</button>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="result-card">
+                        <h4><i class="fas fa-calendar-alt"></i> Crop Growth Stage</h4>
+                        <div id="cropCycle">
+                        </div>
+                        <div class="progress mt-3" style="height: 10px;">
+                            <div class="progress-bar bg-success" id="growthProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5>FarmerAssist</h5>
+                    <p>Empowering farmers with AI-driven solutions to revolutionize agriculture and increase
+                        productivity.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="#">Services</a></li>
+                        <li><a href="/AIFarm">AIFarm</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Services</h5>
+                    <ul>
+                        <li><a href="#">Crop Prediction</a></li>
+                        <li><a href="#">Soil Analysis</a></li>
+                        <li><a href="#">Weather Forecast</a></li>
+                        <li><a href="#">Market Prices</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Newsletter</h5>
+                    <p>Subscribe to our newsletter for the latest updates and farming tips.</p>
+                    <form class="mt-3">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your Email">
+                            <button class="btn btn-primary" type="submit">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="copyright text-center">
+                <p>&copy; 2023 FarmerAssist. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Sample data (in real app, this would come from APIs)
+        const mandiPrices = {
+            wheat: [
+                { mandi: "Delhi", price: "2,150", trend: "up" },
+                { mandi: "Karnal", price: "2,075", trend: "down" },
+                { mandi: "Ludhiana", price: "2,100", trend: "stable" }
+            ],
+            rice: [
+                { mandi: "Chandigarh", price: "1,850", trend: "stable" },
+                { mandi: "Patna", price: "1,780", trend: "up" }
+            ],
+            // Add data for other crops
+        };
+
+        const weatherData = {
+            punjab: {
+                current: { temp: 28, desc: "Sunny", icon: "fa-sun" },
+                forecast: [
+                    { day: "Today", icon: "fa-sun", high: 30, low: 22 },
+                    { day: "Tue", icon: "fa-cloud-sun", high: 29, low: 23 },
+                    { day: "Wed", icon: "fa-cloud-rain", high: 27, low: 21 }
+                ],
+                alert: "Heat wave expected in next 3 days"
+            },
+            // Add data for other regions
+        };
+
+        const cropAdvice = {
+            wheat: {
+                suggestions: [
+                    "Monitor for aphid infestations - spray imidacloprid if needed",
+                    "Apply final irrigation at milking stage",
+                    "Harvest when moisture content is 20-25%"
+                ],
+                cycle: [
+                    { stage: "Sowing", active: false },
+                    { stage: "Germination", active: false },
+                    { stage: "Tillering", active: false },
+                    { stage: "Stem Elongation", active: true },
+                    { stage: "Heading", active: false },
+                    { stage: "Maturity", active: false }
+                ]
+            },
+            // Add data for other crops
+        };
+
+        // Form submission handler
+        document.getElementById('cropForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const crop = document.getElementById('cropSelect').value;
+            const region = document.getElementById('regionSelect').value;
+            const season = document.getElementById('seasonSelect').value;
+            
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Load mandi prices
+            loadMandiPrices(crop);
+            
+            // Load weather data
+            loadWeatherData(region);
+            
+            // Load crop advice
+            loadCropAdvice(crop);
+            
+            // Scroll to results
+            window.scrollTo({
+                top: document.getElementById('resultsSection').offsetTop - 20,
+                behavior: 'smooth'
+            });
+        });
+
+        function loadMandiPrices(crop) {
+            const tableBody = document.getElementById('priceTable');
+            tableBody.innerHTML = '';
+            
+            const prices = mandiPrices[crop] || [];
+            
+            prices.forEach(item => {
+                const trendIcon = item.trend === 'up' ? 'fa-arrow-up text-success' : 
+                                item.trend === 'down' ? 'fa-arrow-down text-danger' : 'fa-minus text-secondary';
+                
+                const row = `
+                    <tr>
+                        <td>${item.mandi}</td>
+                        <td>₹${item.price}</td>
+                        <td><i class="fas ${trendIcon}"></i></td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+            
+            document.getElementById('priceUpdateTime').textContent = new Date().toLocaleString();
+        }
+
+        function loadWeatherData(region) {
+            const weather = weatherData[region] || weatherData['punjab']; // Default to Punjab if no data
+            
+            // Current weather
+            document.getElementById('weatherMainIcon').className = `fas ${weather.current.icon}`;
+            document.getElementById('weatherTemp').textContent = `${weather.current.temp}°C`;
+            document.getElementById('weatherDesc').textContent = weather.current.desc;
+            
+            // Forecast
+            const forecastDiv = document.getElementById('weatherForecast');
+            forecastDiv.innerHTML = '';
+            
+            weather.forecast.forEach(day => {
+                forecastDiv.innerHTML += `
+                    <div class="col">
+                        <div class="text-muted">${day.day}</div>
+                        <i class="fas ${day.icon} mb-1"></i>
+                        <div>${day.high}°<span class="text-muted">/${day.low}°</span></div>
+                    </div>
+                `;
+            });
+            
+            // Alert
+            if(weather.alert) {
+                document.getElementById('weatherAlert').style.display = 'block';
+                document.getElementById('alertText').textContent = weather.alert;
+            } else {
+                document.getElementById('weatherAlert').style.display = 'none';
+            }
+        }
+
+        function loadCropAdvice(crop) {
+            const advice = cropAdvice[crop] || cropAdvice['wheat']; // Default to wheat if no data
+            
+            // Suggestions
+            const suggestionsDiv = document.getElementById('cropSuggestions');
+            suggestionsDiv.innerHTML = '';
+            
+            advice.suggestions.forEach(item => {
+                suggestionsDiv.innerHTML += `
+                    <div class="d-flex mb-2">
+                        <i class="fas fa-check-circle text-success mt-1 me-2"></i>
+                        <div>${item}</div>
+                    </div>
+                `;
+            });
+            
+            // Growth cycle
+            const cycleDiv = document.getElementById('cropCycle');
+            cycleDiv.innerHTML = '';
+            
+            let activeIndex = 0;
+            advice.cycle.forEach((stage, index) => {
+                if(stage.active) activeIndex = index;
+                cycleDiv.innerHTML += `
+                    <div class="crop-cycle ${stage.active ? 'active' : ''}">
+                        ${stage.stage}
+                    </div>
+                `;
+            });
+            
+            // Progress
+            const progress = Math.round((activeIndex + 1) / advice.cycle.length * 100);
+            document.getElementById('growthProgress').style.width = `${progress}%`;
+        }
+    </script>
+</body>
+</html>

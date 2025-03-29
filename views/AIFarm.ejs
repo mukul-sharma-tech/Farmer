@@ -1,0 +1,1260 @@
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chatbot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <style>
+        /* General Styling */
+        body {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+            transition: 0.3s;
+        }
+        .nav-link:hover {
+            color: #f8b400 !important;
+        }
+
+
+        /* Chat Container */
+        .chat-container {
+            width: 400px;
+            max-width: 100%;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: #ff758c;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Chat Box */
+        .chat-box {
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        /* Chat Bubbles */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 5px 0;
+            line-height: 1.4;
+            font-size: 14px;
+            word-wrap: break-word;
+            display: inline-block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* User Message */
+        .user-message {
+            align-self: flex-end;
+            background: #007bff;
+            color: white;
+            text-align: right;
+            border-bottom-right-radius: 5px;
+        }
+
+        /* Bot Message */
+        .bot-message {
+            align-self: flex-start;
+            background: #e0e0e0;
+            color: black;
+            text-align: left;
+            border-bottom-left-radius: 5px;
+        }
+
+        /* Input Section */
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #ff758c;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .chat-input button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .chat-input button:hover {
+            background: #0056b3;
+        }
+
+        /* Smooth Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">BrandName</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/weather">Live Weather</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/AIFarm">AIFarm</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h4>🤖 AI Chatbot</h4>
+        </div>
+        <div id="chat-box" class="chat-box"></div>
+
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type a message...">
+            <button onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <script>
+
+        async function sendMessage() {
+            let userInput = document.getElementById("user-input").value.trim();
+            if (!userInput) return;
+
+            let chatBox = document.getElementById("chat-box");
+
+            // Append User Message
+            let userMsg = document.createElement("div");
+            userMsg.className = "chat-bubble user-message";
+            userMsg.innerText = userInput;
+            chatBox.appendChild(userMsg);
+            document.getElementById("user-input").value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Fetch AI Response
+            try {
+                let response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userInput })
+                });
+
+                let data = await response.json();
+
+                // Append Bot Response
+                let botMsg = document.createElement("div");
+                botMsg.className = "chat-bubble bot-message";
+                botMsg.innerText = data.response;
+                chatBox.appendChild(botMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        // Listen for Enter key press
+        document.getElementById("user-input").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevents new line in input field
+                sendMessage();
+            }
+        });
+
+
+
+    </script>
+
+</body>
+
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmerAssist - Smart Farming Solutions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="https://images.unsplash.com/photo-1511735643442-503bb3bd348a?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" type="image/icon type">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #28a745;
+            --secondary-color: #f8b400;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+
+        .carousel-item img {
+            height: 90vh;
+            object-fit: cover;
+            filter: brightness(0.7);
+        }
+
+        .carousel-caption {
+            animation: fadeIn 2s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 0;
+            transition: all 0.3s;
+        }
+
+        .navbar.scrolled {
+            background: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white !important;
+        }
+
+        .navbar-brand span {
+            color: var(--secondary-color);
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--secondary-color);
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .nav-link:hover:before {
+            visibility: visible;
+            width: 100%;
+        }
+
+        .nav-link.active {
+            color: var(--secondary-color) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-outline-light:hover {
+            color: var(--dark-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            color: white;
+            display: flex;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            animation: fadeInUp 1.2s ease;
+        }
+
+        .hero-btns {
+            animation: fadeInUp 1.4s ease;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 100px 0;
+            background-color: var(--light-color);
+        }
+
+        .contact-section h2 {
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--dark-color);
+            position: relative;
+            display: inline-block;
+        }
+
+        .contact-section h2:after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 0;
+        }
+
+        .contact-info {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .contact-info:hover {
+            transform: translateY(-10px);
+        }
+
+        .contact-info i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .contact-info h3 {
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .contact-info p {
+            margin-bottom: 10px;
+        }
+
+        .social-links {
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            background: var(--dark-color);
+            transform: translateY(-5px);
+        }
+
+        /* Contact Form */
+        .contact-form {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-control {
+            height: 50px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        textarea.form-control {
+            height: auto;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        footer h5 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        footer h5:after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 2px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 0;
+        }
+
+        footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        footer ul li {
+            margin-bottom: 10px;
+        }
+
+        footer ul li a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        footer ul li a:hover {
+            color: var(--secondary-color);
+            padding-left: 5px;
+        }
+
+        .copyright {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .contact-info,
+            .contact-form {
+                margin-bottom: 30px;
+            }
+        }
+
+        /* Chat Container */
+        .chat-container {
+            width: 400px;
+            max-width: 100%;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: #ff758c;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Chat Box */
+        .chat-box {
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        /* Chat Bubbles */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 5px 0;
+            line-height: 1.4;
+            font-size: 14px;
+            word-wrap: break-word;
+            display: inline-block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* User Message */
+        .user-message {
+            align-self: flex-end;
+            background: #007bff;
+            color: white;
+            text-align: right;
+            border-bottom-right-radius: 5px;
+        }
+
+        /* Bot Message */
+        .bot-message {
+            align-self: flex-start;
+            background: #e0e0e0;
+            color: black;
+            text-align: left;
+            border-bottom-left-radius: 5px;
+        }
+
+        /* Input Section */
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #ff758c;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .chat-input button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .chat-input button:hover {
+            background: #0056b3;
+        }
+
+        /* Smooth Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat {
+            height: 600px;
+            position: relative;
+            left: 330px;
+            /* top: 100px; */
+            margin: 200px;
+            /* background-color: #413d5c; */
+            width: 500px;
+        }
+
+
+        /* Chat Container with Glassmorphism */
+        .chat-container {
+            height: 600px;
+            width: 500px;
+            background: rgba(11, 111, 76, 0.366);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        h2 {
+            color: #fff;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* Chat Box Styling */
+        .chat-box {
+            height: 440px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .pdfSend {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #pdf-upload {
+            border-radius: 15px;
+            width: 300px;
+            position: relative;
+            left: 80px;
+        }
+
+        /* Chat Bubbles */
+        .chat-bubble {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            display: inline-block;
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        .user-message {
+            background: #4CAF50;
+            color: white;
+            text-align: right;
+            float: right;
+            clear: both;
+        }
+
+        .bot-message {
+            background: #008CBA;
+            color: white;
+            text-align: left;
+            float: left;
+            clear: both;
+        }
+
+        /* Typing Indicator */
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            color: gray;
+        }
+
+        .typing span {
+            width: 6px;
+            height: 6px;
+            background: gray;
+            border-radius: 50%;
+            animation: blink 1.2s infinite ease-in-out;
+        }
+
+        .typing span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Input Field and Button */
+        .input-group input {
+            border-radius: 20px;
+        }
+
+        .btn {
+            border-radius: 20px;
+            transition: 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .download-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 2px;
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .download-btn:hover {
+            opacity: 1;
+        }
+
+        .bot-message {
+            position: relative;
+            padding-right: 35px !important;
+        }
+
+        /* Enhance scroll behavior */
+        .chat-box {
+            scroll-behavior: smooth;
+        }
+
+
+        /* Add clear chat button styling */
+        .clear-chat-btn {
+            position: absolute;
+            right: 25px;
+            top: 15px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .clear-chat-btn:hover {
+            background: #ff6b81;
+            transform: scale(1.05);
+        }
+
+        .chat-header {
+            position: relative;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body data-bs-spy="scroll" data-bs-target=".navbar">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><span>Farmer</span>Assist</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/weather">Live Weather</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/crop">FindCrop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mandi">Mandi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/AIFarm">AIFarm</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-outline-light ms-2" href="/login">Login</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary ms-2" href="/register">Register</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="chat">
+        <div class="chat-container">
+            <h2>🤖 AI Chatbot</h2>
+
+            <div id="chat-box" class="chat-box"></div>
+
+            <div class="pdfSend">
+                <div class="input-group">
+                    <!-- <input type="file" id="pdf-upload" class="form-control" accept="application/pdf"> -->
+                    <input type="text" id="user-input" class="form-control" placeholder="Type a message...">
+                    <button class="btn btn-primary" style="height: 50px;" onclick="sendMessage()">Send</button>
+                </div>
+                <div class="pdf"><input type="file" id="pdf-upload" class="form-control" accept="application/pdf"></div>
+                <button class="clear-chat-btn" onclick="clearChat()">Clear Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5>FarmerAssist</h5>
+                    <p>Empowering farmers with AI-driven solutions to revolutionize agriculture and increase
+                        productivity.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="#">Services</a></li>
+                        <li><a href="/AIFarm">AIFarm</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Services</h5>
+                    <ul>
+                        <li><a href="#">Crop Prediction</a></li>
+                        <li><a href="#">Soil Analysis</a></li>
+                        <li><a href="#">Weather Forecast</a></li>
+                        <li><a href="#">Market Prices</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Newsletter</h5>
+                    <p>Subscribe to our newsletter for the latest updates and farming tips.</p>
+                    <form class="mt-3">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your Email">
+                            <button class="btn btn-primary" type="submit">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="copyright text-center">
+                <p>&copy; 2023 FarmerAssist. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            $('.carousel').carousel({
+                interval: 3000
+            });
+        });
+
+
+        $(document).ready(function () {
+            // Navbar scroll effect
+            $(window).scroll(function () {
+                if ($(this).scrollTop() > 100) {
+                    $('.navbar').addClass('scrolled');
+                } else {
+                    $('.navbar').removeClass('scrolled');
+                }
+            });
+
+            // Smooth scrolling for anchor links
+            $('a[href*="#"]').on('click', function (e) {
+                e.preventDefault();
+
+                $('html, body').animate(
+                    {
+                        scrollTop: $($(this).attr('href')).offset().top - 70,
+                    },
+                    500,
+                    'linear'
+                );
+            });
+
+            // Add active class to nav links on scroll
+            $(window).scroll(function () {
+                var scrollDistance = $(window).scrollTop() + 200;
+
+                $('section').each(function (i) {
+                    if ($(this).position().top <= scrollDistance) {
+                        $('.nav-link.active').removeClass('active');
+                        $('.nav-link').eq(i).addClass('active');
+                    }
+                });
+            }).scroll();
+
+            // Form submission
+            $('.contact-form form').submit(function (e) {
+                e.preventDefault();
+                alert('Thank you for your message! We will get back to you soon.');
+                $(this).trigger("reset");
+            });
+
+            // Newsletter form submission
+            $('footer form').submit(function (e) {
+                e.preventDefault();
+                alert('Thank you for subscribing to our newsletter!');
+                $(this).trigger("reset");
+            });
+        });
+
+
+        async function sendMessage() {
+            let userInput = document.getElementById("user-input").value.trim();
+            if (!userInput) return;
+
+            let chatBox = document.getElementById("chat-box");
+
+            // Append User Message
+            let userMsg = document.createElement("div");
+            userMsg.className = "chat-bubble user-message";
+            userMsg.innerText = userInput;
+            chatBox.appendChild(userMsg);
+            document.getElementById("user-input").value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Fetch AI Response
+            try {
+                let response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userInput })
+                });
+
+                let data = await response.json();
+
+                // Append Bot Response
+                let botMsg = document.createElement("div");
+                botMsg.className = "chat-bubble bot-message";
+                botMsg.innerText = data.response;
+                chatBox.appendChild(botMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        // Listen for Enter key press
+        document.getElementById("user-input").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevents new line in input field
+                sendMessage();
+            }
+        });
+
+
+
+        // Initialize jsPDF properly
+        const { jsPDF } = window.jspdf;
+
+        // Modified sendMessage function
+        async function sendMessage() {
+            let userInput = document.getElementById("user-input").value.trim();
+            if (!userInput) return;
+
+            let chatBox = document.getElementById("chat-box");
+
+            // Append User Message
+            let userMsg = document.createElement("div");
+            userMsg.className = "chat-bubble user-message";
+            userMsg.innerText = userInput;
+            chatBox.appendChild(userMsg);
+            document.getElementById("user-input").value = "";
+            userMsg.scrollIntoView({ behavior: 'smooth' });
+
+            // Typing Indicator
+            let typingIndicator = document.createElement("div");
+            typingIndicator.className = "typing";
+            typingIndicator.innerHTML = "<span></span><span></span><span></span>";
+            chatBox.appendChild(typingIndicator);
+            typingIndicator.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                let response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userInput })
+                });
+
+                let data = await response.json();
+                chatBox.removeChild(typingIndicator);
+
+                // Create bot message container
+                let botMsg = document.createElement("div");
+                botMsg.className = "chat-bubble bot-message";
+
+                // Add response text
+                let textNode = document.createTextNode(data.response);
+                botMsg.appendChild(textNode);
+
+                // Create download button
+                let downloadBtn = document.createElement("button");
+                downloadBtn.className = "download-btn";
+                downloadBtn.innerHTML = "📥";
+                downloadBtn.onclick = () => generatePDF(data.response);
+
+                botMsg.appendChild(downloadBtn);
+                chatBox.appendChild(botMsg);
+                botMsg.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        // PDF generation function
+        // function generatePDF(text) {
+        //     const doc = new jsPDF();
+        //     const formattedText = doc.splitTextToSize(text, 180);
+        //     doc.text(formattedText, 10, 10);
+        //     doc.save('chat-response.pdf');
+        // }
+
+        // Modified PDF generation function
+        function generatePDF(text) {
+            const doc = new jsPDF();
+            const lineHeight = 12;
+            const margin = 20;
+            let yPos = margin;
+
+            // Split text into paragraphs
+            const paragraphs = text.split('\n').filter(p => p.trim() !== '');
+
+            // Custom text splitting with paragraph preservation
+            paragraphs.forEach(paragraph => {
+                const lines = doc.splitTextToSize(paragraph, doc.internal.pageSize.width - 2 * margin);
+
+                lines.forEach((line, index) => {
+                    if (yPos > doc.internal.pageSize.height - margin) {
+                        doc.addPage();
+                        yPos = margin;
+                    }
+
+                    doc.text(line, margin, yPos);
+                    yPos += lineHeight;
+
+                    // Add extra space after paragraph
+                    if (index === lines.length - 1) yPos += lineHeight / 2;
+                });
+            });
+
+            doc.save('Farmer.pdf');
+        }
+
+
+        // Enter key listener
+        document.getElementById("user-input").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // PDF text extraction
+        // async function extractTextFromPDF(file) {
+        //     let fileReader = new FileReader();
+        //     fileReader.readAsArrayBuffer(file);
+
+        //     return new Promise((resolve, reject) => {
+        //         fileReader.onload = async function () {
+        //             let pdfData = new Uint8Array(fileReader.result);
+        //             let pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+        //             let text = "";
+
+        //             for (let i = 1; i <= pdf.numPages; i++) {
+        //                 let page = await pdf.getPage(i);
+        //                 let textContent = await page.getTextContent();
+        //                 text += textContent.items.map((item) => item.str).join(" ") + "\n";
+        //             }
+        //             resolve(text);
+        //         };
+        //         fileReader.onerror = reject;
+        //     });
+        // }
+
+        // Function to extract text from PDF
+        async function extractTextFromPDF(file) {
+            let fileReader = new FileReader();
+
+            return new Promise((resolve, reject) => {
+                fileReader.onload = async function () {
+                    try {
+                        let pdfData = new Uint8Array(fileReader.result);
+                        let pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                        let text = "";
+
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            let page = await pdf.getPage(i);
+                            let textContent = await page.getTextContent();
+                            let pageText = textContent.items.map(item => item.str).join(" ");
+                            text += pageText + "\n"; // Append extracted text with a newline
+                        }
+                        resolve(text.trim()); // Trim to remove unnecessary spaces
+                    } catch (error) {
+                        reject("Error processing PDF: " + error);
+                    }
+                };
+
+                fileReader.onerror = () => reject("Error reading file");
+                fileReader.readAsArrayBuffer(file);
+            });
+        }
+
+        // PDF upload handler
+        document.getElementById("pdf-upload").addEventListener("change", async function (event) {
+            let file = event.target.files[0];
+            if (file && file.type === "application/pdf") {
+                try {
+                    let extractedText = await extractTextFromPDF(file);
+                    document.getElementById("user-input").value = extractedText;
+                } catch (error) {
+                    alert("Error processing PDF file");
+                }
+            } else {
+                alert("Please upload a valid PDF file.");
+            }
+        });
+
+
+        // Add clear chat function
+        function clearChat() {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = '';
+        }
+
+    </script>
+</body>
+
+</html>

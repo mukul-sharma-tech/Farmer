@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Mandi Prices | FarmerAssist</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="https://images.unsplash.com/photo-1511735643442-503bb3bd348a?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" type="image/icon type">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #28a745;
+            --secondary-color: #f8b400;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            padding-top: 70px;
+        }
+        
+        .navbar {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 0;
+            transition: all 0.3s;
+        }
+        
+        .navbar.scrolled {
+            background: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1586771107445-d3ca888129ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            color: white;
+            padding: 80px 0;
+            margin-bottom: 40px;
+        }
+        
+        .filter-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .price-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+        
+        .price-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .price-badge {
+            background-color: #e8f5e9;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .trend-up {
+            color: #28a745;
+        }
+        
+        .trend-down {
+            color: #dc3545;
+        }
+        
+        .trend-neutral {
+            color: #6c757d;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 60px 0;
+            }
+        }
+
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 0;
+            transition: all 0.3s;
+        }
+
+        .navbar.scrolled {
+            background: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white !important;
+        }
+
+        .navbar-brand span {
+            color: var(--secondary-color);
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--secondary-color);
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .nav-link:hover:before {
+            visibility: visible;
+            width: 100%;
+        }
+
+        .nav-link.active {
+            color: var(--secondary-color) !important;
+        }
+
+     
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><span>Farmer</span>Assist</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/weather">Live Weather</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/crop">FindCrop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mandi">Mandi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/AIFarm">AIFarm</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-outline-light ms-2" href="/login">Login</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary ms-2" href="/register">Register</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container text-center">
+            <h1><i class="fas fa-rupee-sign"></i> Live Mandi Prices</h1>
+            <p class="lead">Real-time agricultural commodity prices from APMC markets across India</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Filter Section -->
+        <div class="filter-card">
+            <h3 class="mb-4"><i class="fas fa-filter"></i> Filter Prices</h3>
+            <form id="priceFilterForm">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Select State</label>
+                        <select class="form-select" id="stateSelect" required>
+                            <option value="" selected disabled>Choose state</option>
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Select District</label>
+                        <select class="form-select" id="districtSelect" required disabled>
+                            <option value="" selected disabled>Choose district</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Select Commodity</label>
+                        <select class="form-select" id="commoditySelect" required>
+                            <option value="" selected disabled>Choose commodity</option>
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Date Range</label>
+                        <input type="date" class="form-control" id="dateSelect" value="">
+                    </div>
+                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-search"></i> Search Prices
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Fetching latest mandi prices from Data.gov.in...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 id="resultsTitle">Mandi Prices</h3>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-outline-success ms-2" id="downloadBtn">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mandi</th>
+                            <th>Commodity</th>
+                            <th>Variety</th>
+                            <th>Min Price (₹/q)</th>
+                            <th>Max Price (₹/q)</th>
+                            <th>Modal Price (₹/q)</th>
+                            <th>Trend</th>
+                            <th>Updated On</th>
+                        </tr>
+                    </thead>
+                    <tbody id="priceTable">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Filled by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Price Trends Card -->
+        <div class="row mt-4">
+            <div class="col-lg-6">
+                <div class="price-card">
+                    <h4><i class="fas fa-chart-line"></i> Price Trends</h4>
+                    <canvas id="priceTrendChart" height="250"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="price-card">
+                    <h4><i class="fas fa-map-marked-alt"></i> Nearby Mandis</h4>
+                    <div id="map" style="height: 250px; background: #eee; border-radius: 8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Data Sources</h5>
+                    <p>Prices sourced from <a href="https://data.gov.in" target="_blank" class="text-white-50">Data.gov.in</a> AGMARKNET API</p>
+                    <p>Updated daily from Agricultural Produce Market Committees</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white-50">API Documentation</a></li>
+                        <li><a href="#" class="text-white-50">Price Alerts</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Support</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white-50">Contact Us</a></li>
+                        <li><a href="#" class="text-white-50">Feedback</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-4 pt-3 border-top border-secondary">
+                <p>&copy; 2023 FarmerAssist. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY&callback=initMap" async defer></script>
+    
+    <script>
+        // Configuration
+        const DATA_GOV_API_KEY = '579b464db66ec23bdd000001dbb2b5ecf966428b50867dbddf2c44be'; // Replace with your actual API key
+        const API_BASE_URL = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001cdc3b564546246a772a26393094f5645&offset=0&limit=all&format=csv&format=json';
+        
+        // Global variables
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+        let priceChart = null;
+        let map = null;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInitialData();
+            setupEventListeners();
+        });
+
+        function loadInitialData() {
+            // Load states
+            fetchStates();
+            
+            // Load commodities
+            fetchCommodities();
+        }
+
+        function setupEventListeners() {
+            // Form submission
+            document.getElementById('priceFilterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchPrices();
+            });
+            
+            // State selection change
+            document.getElementById('stateSelect').addEventListener('change', function() {
+                const state = this.value;
+                if (state) {
+                    fetchDistricts(state);
+                } else {
+                    document.getElementById('districtSelect').disabled = true;
+                }
+            });
+            
+            // Refresh button
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                searchPrices();
+            });
+            
+            // Download button
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                downloadData();
+            });
+        }
+
+        async function fetchStates() {
+            try {
+                // In production, this would come from the API or a predefined list
+                const states = [
+                    'Andhra Pradesh', 'Bihar', 'Gujarat', 'Haryana', 
+                    'Karnataka', 'Madhya Pradesh', 'Maharashtra', 'Punjab',
+                    'Rajasthan', 'Tamil Nadu', 'Uttar Pradesh', 'West Bengal'
+                ];
+                
+                const select = document.getElementById('stateSelect');
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = state;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading states:', error);
+                alert('Failed to load state options');
+            }
+        }
+
+        async function fetchDistricts(state) {
+            try {
+                document.getElementById('districtSelect').disabled = true;
+                document.getElementById('districtSelect').innerHTML = '<option value="" selected disabled>Loading districts...</option>';
+                
+                // Simulate API call - in production, this would come from backend or Data.gov.in API
+                const districtsByState = {
+                    'Andhra Pradesh': ['Anantapur', 'Chittoor', 'East Godavari', 'Guntur'],
+                    'Maharashtra': ['Ahmednagar', 'Akola', 'Amravati', 'Aurangabad'],
+                    'Punjab': ['Amritsar', 'Barnala', 'Bathinda', 'Fazilka'],
+                    'Uttar Pradesh': ['Agra', 'Aligarh', 'Allahabad', 'Ambedkar Nagar']
+                    // Add more states as needed
+                };
+                
+                const districts = districtsByState[state] || ['Select District'];
+                
+                const select = document.getElementById('districtSelect');
+                select.innerHTML = '';
+                districts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    select.appendChild(option);
+                });
+                select.disabled = false;
+            } catch (error) {
+                console.error('Error loading districts:', error);
+                alert('Failed to load district options');
+            }
+        }
+
+        async function fetchCommodities() {
+            try {
+                // In production, this would come from the API
+                const commodities = [
+                    'Wheat', 'Rice', 'Maize', 'Soybean', 'Cotton', 
+                    'Sugarcane', 'Potato', 'Tomato', 'Onion', 'Chilli',
+                    'Bajra', 'Barley', 'Gram', 'Groundnut', 'Jowar',
+                    'Mustard', 'Sunflower', 'Turmeric', 'Arhar', 'Moong'
+                ];
+                
+                const select = document.getElementById('commoditySelect');
+                commodities.forEach(commodity => {
+                    const option = document.createElement('option');
+                    option.value = commodity;
+                    option.textContent = commodity;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading commodities:', error);
+                alert('Failed to load commodity options');
+            }
+        }
+
+        async function searchPrices(page = 1) {
+            try {
+                currentPage = page;
+                
+                // Get form values
+                const state = document.getElementById('stateSelect').value;
+                const district = document.getElementById('districtSelect').value;
+                const commodity = document.getElementById('commoditySelect').value;
+                const date = document.getElementById('dateSelect').value;
+                
+                // Validate
+                if (!state || !district || !commodity) {
+                    alert('Please select state, district and commodity');
+                    return;
+                }
+                
+                // Save current filters
+                currentFilters = { state, district, commodity, date };
+                
+                // Show loading spinner
+                document.getElementById('loadingSpinner').style.display = 'block';
+                document.getElementById('resultsSection').style.display = 'none';
+                
+                // Fetch data from Data.gov.in API
+                const response = await fetchMandiPrices(state, district, commodity, date, page);
+                
+                // Process response
+                if (response && response.records && response.records.length > 0) {
+                    displayPrices(response.records);
+                    updatePagination(response.total);
+                    updateResultsTitle(state, district, commodity);
+                    
+                    // Load additional data
+                    loadPriceTrends(state, district, commodity);
+                    loadMap(response.records);
+                } else {
+                    document.getElementById('priceTable').innerHTML = `
+                        <tr>
+                            <td colspan="8" class="text-center py-4">No price data available for the selected filters</td>
+                        </tr>
+                    `;
+                }
+                
+                // Hide spinner and show results
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error fetching mandi prices:', error);
+                alert('Failed to fetch mandi prices. Please try again.');
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        }
+
+        async function fetchMandiPrices(state, district, commodity, date, page = 1, limit = 10) {
+            try {
+                // Note: This is a simulation - the actual Data.gov.in API may have different parameters
+                // You'll need to adjust based on the actual API documentation
+                
+                // Simulated API URL (replace with actual)
+                const url = `${"579b464db66ec23bdd000001dbb2b5ecf966428b50867dbddf2c44be"}?api-key=${"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"}&format=json&filters[state]=${state}&filters[district]=${district}&filters[commodity]=${commodity}&offset=${(page-1)*limit}&limit=${limit}`;
+                
+                // Simulate API response
+                const mockResponse = {
+                    total: 25,
+                    records: Array.from({ length: limit }, (_, i) => ({
+                        market: `${district} APMC ${i+1}`,
+                        commodity: commodity,
+                        variety: getRandomVariety(commodity),
+                        min_price: (Math.random() * 1000 + 1000).toFixed(2),
+                        max_price: (Math.random() * 1000 + 1500).toFixed(2),
+                        modal_price: (Math.random() * 1000 + 1200).toFixed(2),
+                        price_trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)],
+                        arrival_date: date || new Date().toISOString().split('T')[0]
+                    }))
+                };
+                
+                // Simulate delay for API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                return mockResponse;
+                
+                // In production, use the actual API call:
+                // const response = await axios.get(url);
+                // return response.data;
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        function displayPrices(records) {
+            const tableBody = document.getElementById('priceTable');
+            tableBody.innerHTML = '';
+            
+            records.forEach(item => {
+                const trendClass = item.price_trend === 'up' ? 'trend-up' : 
+                                  item.price_trend === 'down' ? 'trend-down' : 'trend-neutral';
+                
+                const trendIcon = item.price_trend === 'up' ? 'fa-arrow-up' : 
+                                 item.price_trend === 'down' ? 'fa-arrow-down' : 'fa-equals';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.market}</td>
+                    <td>${item.commodity}</td>
+                    <td>${item.variety}</td>
+                    <td>₹${item.min_price}</td>
+                    <td>₹${item.max_price}</td>
+                    <td><strong>₹${item.modal_price}</strong></td>
+                    <td class="${trendClass}"><i class="fas ${trendIcon}"></i></td>
+                    <td>${formatDate(item.arrival_date)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updatePagination(totalRecords) {
+            const recordsPerPage = 10;
+            totalPages = Math.ceil(totalRecords / recordsPerPage);
+            
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // Previous button
+            pagination.innerHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="searchPrices(${currentPage - 1})">Previous</a>
+                </li>
+            `;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="searchPrices(${i})">${i}</a>
+                    </li>
+                `;
+            }
+            
+            // Next button
+            pagination.innerHTML += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="searchPrices(${currentPage + 1})">Next</a>
+                </li>
+            `;
+        }
+
+        function updateResultsTitle(state, district, commodity) {
+            document.getElementById('resultsTitle').textContent = 
+                `${commodity} Prices in ${district}, ${state}`;
+        }
+
+        function loadPriceTrends(state, district, commodity) {
+            // Simulate fetching historical data
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const currentMonth = new Date().getMonth();
+            const labels = months.slice(Math.max(0, currentMonth - 5), currentMonth + 1);
+            
+            const data = labels.map(() => Math.random() * 1000 + 1000);
+            
+            // Create or update chart
+            const ctx = document.getElementById('priceTrendChart').getContext('2d');
+            
+            if (priceChart) {
+                priceChart.data.labels = labels;
+                priceChart.data.datasets[0].data = data;
+                priceChart.update();
+            } else {
+                priceChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `Price Trend (₹/quintal)`,
+                            data: data,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Last 6 Months Price Trend for ${commodity}`
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initMap() {
+            // This will be called by Google Maps API when loaded
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 20.5937, lng: 78.9629 }, // India coordinates
+                zoom: 5
+            });
+        }
+
+        function loadMap(records) {
+            if (!map) return;
+            
+            // Clear existing markers
+            const mapDiv = document.getElementById('map');
+            mapDiv.innerHTML = '';
+            map = new google.maps.Map(mapDiv, {
+                center: { lat: 20.5937, lng: 78.9629 },
+                zoom: 6
+            });
+            
+            // Simulate adding markers for each mandi
+            records.forEach((record, index) => {
+                // In production, you would geocode the mandi locations
+                const marker = new google.maps.Marker({
+                    position: {
+                        lat: 20.5937 + (Math.random() * 5 - 2.5),
+                        lng: 78.9629 + (Math.random() * 5 - 2.5)
+                    },
+                    map: map,
+                    title: record.market,
+                    label: (index + 1).toString()
+                });
+                
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px;">
+                            <h6>${record.market}</h6>
+                            <p>${record.commodity}: ₹${record.modal_price}/q</p>
+                        </div>
+                    `
+                });
+                
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+            });
+            
+            // Adjust map bounds to show all markers
+            if (records.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                records.forEach(() => {
+                    bounds.extend({
+                        lat: 20.5937 + (Math.random() * 5 - 2.5),
+                        lng: 78.9629 + (Math.random() * 5 - 2.5)
+                    });
+                });
+                map.fitBounds(bounds);
+            }
+        }
+
+        function downloadData() {
+            // In production, this would generate a CSV/Excel file from the data
+            alert('Export functionality would download current price data as CSV');
+        }
+
+        // Helper functions
+        function getRandomVariety(commodity) {
+            const varieties = {
+                'Wheat': ['Sharbati', 'Lokwan', 'MP Wheat', 'Punjab Wheat'],
+                'Rice': ['Basmati', 'Sona Masoori', 'Ponni', 'Joha'],
+                'Tomato': ['Hybrid', 'Desi', 'Cherry'],
+                'Potato': ['Kufri Jyoti', 'Kufri Pukhraj', 'Kufri Chipsona']
+            };
+            
+            return varieties[commodity] ? 
+                   varieties[commodity][Math.floor(Math.random() * varieties[commodity].length)] :
+                   'Local';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Today';
+            const date = new Date(dateString);
+            return isNaN(date) ? dateString : date.toLocaleDateString('en-IN');
+        }
+    </script>
+</body>
+</html>
